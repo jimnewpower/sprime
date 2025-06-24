@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+<h:head>
+    <title>PrimeFaces Demo Application</title>
+</h:head>
+<h:body>
+    <h:form>
+        <div class="card">
+            <h2>#{welcomeController.welcomeMessage}</h2>
+
+            <p:panel header="PrimeFaces Panel" style="margin-bottom:20px">
+                <h:panelGrid columns="1" cellpadding="10">
+                    <h:outputText value="PrimeFaces is a popular UI component library for JavaServer Faces (JSF) applications. This is a simple demo application to showcase PrimeFaces capabilities." />
+                </h:panelGrid>
+            </p:panel>
+
+            <p:tabView>
+                <p:tab title="Components">
+                    <h:panelGrid columns="2" cellpadding="10">
+                        <p:outputPanel>
+                            <h3>Basic Components</h3>
+
+                            <p:commandButton value="Button" icon="pi pi-check" style="margin-right: 10px" update="@form"/>
+                            <p:commandButton value="Button" icon="pi pi-times" styleClass="ui-button-secondary"/>
+
+                            <h:panelGrid columns="2" style="margin-top: 20px">
+                                <p:outputLabel for="input" value="Input:" />
+                                <p:inputText id="input" placeholder="Enter text"/>
+                            </h:panelGrid>
+                        </p:outputPanel>
+                    </h:panelGrid>
+                </p:tab>
+                <p:tab title="Data Display">
+                    <p:dataTable var="item" value="#{welcomeController.items}" style="margin-top: 20px">
+                        <p:column headerText="ID">
+                            <h:outputText value="#{welcomeController.items.indexOf(item) + 1}" />
+                        </p:column>
+                        <p:column headerText="Item">
+                            <h:outputText value="#{item}" />
+                        </p:column>
+                        <p:column headerText="Description">
+                            <h:outputText value="Description for #{item}" />
+                        </p:column>
+                    </p:dataTable>
+                </p:tab>
+                <p:tab title="About">
+                    <h:panelGrid columns="1" cellpadding="10">
+                        <h:outputText value="This is a demo application showcasing PrimeFaces integration with Spring Boot." />
+                        <h:outputText value="PrimeFaces is a lightweight library with one jar, no dependencies and no required configuration." />
+                    </h:panelGrid>
+                </p:tab>
+            </p:tabView>
+
+            <p:dialog header="Dialog" widgetVar="dlg" minHeight="40" width="350" showEffect="fade">
+                <p>This is a sample dialog component.</p>
+                <p:commandButton value="Close" onclick="PF('dlg').hide()"/>
+            </p:dialog>
+
+            <div style="margin-top: 20px">
+                <p:commandButton value="Show Dialog" onclick="PF('dlg').show()"/>
+            </div>
+        </div>
+    </h:form>
+</h:body>
+</html>
