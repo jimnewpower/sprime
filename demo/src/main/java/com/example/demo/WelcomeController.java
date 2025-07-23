@@ -15,12 +15,15 @@ import com.example.demo.application.Env;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.faces.view.ViewScoped;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @Component
 @ViewScoped
 public class WelcomeController implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    private static final Logger logger = LogManager.getLogger(WelcomeController.class);
 
     @Autowired
     private Application application;
@@ -30,6 +33,7 @@ public class WelcomeController implements Serializable {
 
     @PostConstruct
     public void init() {
+        logger.info("Initializing WelcomeController");
         String welcomeMessage = "Welcome to PrimeFaces with Spring Boot";
         List<String> items = new ArrayList<>();
         items.add("Item 1");
@@ -39,6 +43,7 @@ public class WelcomeController implements Serializable {
         items.add("Item 5");
         appCache.put("welcomeMessage", welcomeMessage);
         appCache.put("items", items);
+        logger.debug("Welcome message and items added to cache");
     }
 
     public String getWelcomeMessage() {
@@ -82,6 +87,7 @@ public class WelcomeController implements Serializable {
     }
 
     public void throwException() {
+        logger.error("Test exception thrown from WelcomeController");
         throw new IllegalArgumentException("Test exception");
     }
 }
