@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.example.demo.application.AppCache;
 import com.example.demo.application.Application;
 
 import jakarta.annotation.PostConstruct;
@@ -20,27 +21,30 @@ public class WelcomeController implements Serializable {
 
     @Autowired
     private Application application;
-    
-    private String welcomeMessage;
-    private List<String> items;
+
+    @Autowired
+    private AppCache appCache;
 
     @PostConstruct
     public void init() {
-        welcomeMessage = "Welcome to PrimeFaces with Spring Boot!";
-        items = new ArrayList<>();
+        String welcomeMessage = "Welcome to PrimeFaces with Spring Boot";
+        List<String> items = new ArrayList<>();
         items.add("Item 1");
         items.add("Item 2");
         items.add("Item 3");
         items.add("Item 4");
         items.add("Item 5");
+        appCache.put("welcomeMessage", welcomeMessage);
+        appCache.put("items", items);
     }
 
     public String getWelcomeMessage() {
-        return welcomeMessage;
+        return (String) appCache.get("welcomeMessage");
     }
 
+    @SuppressWarnings("unchecked")
     public List<String> getItems() {
-        return items;
+        return (List<String>) appCache.get("items");
     }
 
     public String getProfile() {
