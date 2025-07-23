@@ -38,7 +38,8 @@
                             <h3>Basic Components</h3>
 
                             <p:commandButton value="Button" icon="pi pi-check" style="margin-right: 10px" update="@form"/>
-                            <p:commandButton value="Button" icon="pi pi-times" styleClass="ui-button-secondary"/>
+                            <p:commandButton value="Button" icon="pi pi-times" style="margin-right: 10px" styleClass="ui-button-secondary"/>
+                            <p:commandButton value="Throw Exception" icon="pi pi-times" styleClass="ui-button-secondary" action="#{welcomeController.throwException}"/>
 
                             <h:panelGrid columns="2" style="margin-top: 20px">
                                 <p:outputLabel for="input" value="Input:" />

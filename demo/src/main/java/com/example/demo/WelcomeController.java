@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jboss.weld.exceptions.IllegalArgumentException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootVersion;
 import org.springframework.stereotype.Component;
@@ -78,5 +79,9 @@ public class WelcomeController implements Serializable {
             return "Unknown (see pom.xml)";
         }
         return impl + " (spec: " + spec + ")";
+    }
+
+    public void throwException() {
+        throw new IllegalArgumentException("Test exception");
     }
 }

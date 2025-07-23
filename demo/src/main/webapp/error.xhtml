@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+    <title>Error</title>
+</h:head>
+<h:body>
+    <h1>Oops! Something went wrong.</h1>
+    <h:outputText value="An unexpected error has occurred. Please try again later or contact support." />
+    <br/>
+    <h:link value="Back to Home" outcome="/index.xhtml" />
+    <br/><br/>
+    <p:commandLink value="Show Details" onclick="PF('errorDialog').show(); return false;" rendered="#{not empty requestScope['javax.servlet.error.exception'] or not empty requestScope['javax.servlet.error.message']}"></p:commandLink>
+    <p:dialog header="Error Details" widgetVar="errorDialog" modal="true" resizable="false" width="600">
+        <h:panelGroup rendered="#{not empty requestScope['javax.servlet.error.status_code']}">
+            <b>Status Code:</b> #{requestScope['javax.servlet.error.status_code']}<br/>
+        </h:panelGroup>
+        <h:panelGroup rendered="#{not empty requestScope['javax.servlet.error.message']}">
+            <b>Message:</b> #{requestScope['javax.servlet.error.message']}<br/>
+        </h:panelGroup>
+        <h:panelGroup rendered="#{not empty requestScope['javax.servlet.error.exception']}">
+            <b>Exception:</b> #{requestScope['javax.servlet.error.exception'].getClass().getName()}<br/>
+            <b>Stack Trace:</b>
+            <pre style="max-height:300px;overflow:auto;white-space:pre-wrap;">
+#{requestScope['javax.servlet.error.exception'].stackTrace}
+            </pre>
+        </h:panelGroup>
+        <h:panelGroup rendered="#{empty requestScope['javax.servlet.error.exception'] and empty requestScope['javax.servlet.error.message']}">
+            No additional error details available.
+        </h:panelGroup>
+    </p:dialog>
+</h:body>
+</html> 
