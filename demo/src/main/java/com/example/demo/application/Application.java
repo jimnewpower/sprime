@@ -16,4 +16,8 @@ public class Application {
         return environment.getProperty("joinfaces.jsf.project-stage");
     }
 
+    public String getProperty(String key) {
+        return environment.getProperty(key);
+    }
+
 }

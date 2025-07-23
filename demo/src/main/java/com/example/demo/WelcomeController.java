@@ -50,6 +50,10 @@ public class WelcomeController implements Serializable {
         return (List<String>) appCache.get("items");
     }
 
+    public String getProperty(String key) {
+        return application.getProperty(key);
+    }
+
     public String getProfile() {
         return application.getProfile();
     }

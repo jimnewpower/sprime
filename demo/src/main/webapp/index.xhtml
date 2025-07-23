@@ -18,7 +18,15 @@
                     <h:outputText value="JSF Version: #{welcomeController.jsfVersion}" />
                     <h:outputText value="Spring Boot Version: #{welcomeController.springBootVersion}" />
                     <h:outputText value="PrimeFaces Version: #{welcomeController.primeFacesVersion}" />
-                    <h:outputText value="joinfaces.jsf.project-stage: #{welcomeController.profile}" />   
+                    <h:outputText value="joinfaces.jsf.project-stage: #{welcomeController.getProperty('joinfaces.jsf.project-stage')}" /> 
+                    <h:outputText value="joinfaces.primefaces.theme: #{welcomeController.getProperty('joinfaces.primefaces.theme')}" /> 
+                    <h:outputText value="joinfaces.faces-servlet.url-mappings: #{welcomeController.getProperty('joinfaces.faces-servlet.url-mappings')}" /> 
+                    <h:outputText value="joinfaces.jsf.facelets-suffix: #{welcomeController.getProperty('joinfaces.jsf.facelets-suffix')}" /> 
+                    <h:outputText value="joinfaces.mojarra.annotation-scanning.managed-bean-scan: #{welcomeController.getProperty('joinfaces.mojarra.annotation-scanning.managed-bean-scan')}" /> 
+                    <h:outputText value="server.port: #{welcomeController.getProperty('server.port')}" /> 
+                    <h:outputText value="logging.level.org.joinfaces: #{welcomeController.getProperty('logging.level.org.joinfaces')}" /> 
+                    <h:outputText value="server.servlet.context-path: #{welcomeController.getProperty('server.servlet.context-path')}" /> 
+                    <h:outputText value="spring.application.name: #{welcomeController.getProperty('spring.application.name')}" /> 
                 </h:panelGrid>
             </p:panel>
 
