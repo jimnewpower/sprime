@@ -14,7 +14,11 @@
 
             <p:panel header="PrimeFaces Panel" style="margin-bottom:20px">
                 <h:panelGrid columns="1" cellpadding="10">
-                    <h:outputText value="spring.profiles.active: #{welcomeController.profile}" />
+                    <h:outputText value="spring.profiles.active: #{welcomeController.profile}" />   
+                    <h:outputText value="Java Version: #{welcomeController.javaVersion}" />
+                    <h:outputText value="JSF Version: #{welcomeController.jsfVersion}" />
+                    <h:outputText value="Spring Boot Version: #{welcomeController.springBootVersion}" />
+                    <h:outputText value="PrimeFaces Version: #{welcomeController.primeFacesVersion}" />
                 </h:panelGrid>
             </p:panel>
 

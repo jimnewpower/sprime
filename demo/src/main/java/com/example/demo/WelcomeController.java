@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.primefaces.util.Constants;
+
+import org.springframework.boot.SpringBootVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -49,5 +52,28 @@ public class WelcomeController implements Serializable {
 
     public String getProfile() {
         return application.getProfile();
+    }
+
+    public String getJavaVersion() {
+        return System.getProperty("java.version");
+    }
+
+    public String getJsfVersion() {
+        Package jsfPkg = jakarta.faces.FactoryFinder.class.getPackage();
+        return jsfPkg.getImplementationVersion() + " (spec: " + jsfPkg.getSpecificationVersion() + ")";
+    }
+
+    public String getSpringBootVersion() {
+        return SpringBootVersion.getVersion();
+    }
+
+    public String getPrimeFacesVersion() {
+        Package pkg = org.primefaces.PrimeFaces.class.getPackage();
+        String impl = pkg.getImplementationVersion();
+        String spec = pkg.getSpecificationVersion();
+        if (impl == null && spec == null) {
+            return "Unknown (see pom.xml)";
+        }
+        return impl + " (spec: " + spec + ")";
     }
 }
