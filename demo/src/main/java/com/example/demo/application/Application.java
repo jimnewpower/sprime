@@ -12,8 +12,8 @@ public class Application {
     @Autowired
     private Environment environment;
     
-    public String getProfile() {
-        return environment.getProperty("joinfaces.jsf.project-stage");
+    public Env getEnv() {
+        return Env.getEnv(environment.getProperty("joinfaces.jsf.project-stage"));
     }
 
     public String getProperty(String key) {

@@ -4,14 +4,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.primefaces.util.Constants;
-
-import org.springframework.boot.SpringBootVersion;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringBootVersion;
 import org.springframework.stereotype.Component;
 
 import com.example.demo.application.AppCache;
 import com.example.demo.application.Application;
+import com.example.demo.application.Env;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.faces.view.ViewScoped;
@@ -54,8 +53,8 @@ public class WelcomeController implements Serializable {
         return application.getProperty(key);
     }
 
-    public String getProfile() {
-        return application.getProfile();
+    public Env getEnv() {
+        return application.getEnv();
     }
 
     public String getJavaVersion() {
