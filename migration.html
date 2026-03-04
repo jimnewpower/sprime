@@ -1,0 +1,306 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spring Boot Migration Infographic</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--bg:#0a0e1a;--surface:#111827;--surface-2:#1a2236;--border:#1e293b;--text:#e2e8f0;--text-muted:#94a3b8;--text-dim:#64748b;--green:#34d399;--green-glow:rgba(52,211,153,0.15);--blue:#60a5fa;--blue-glow:rgba(96,165,250,0.12);--purple:#a78bfa;--purple-glow:rgba(167,139,250,0.12);--orange:#fb923c;--red:#f87171;--yellow:#fbbf24;--cyan:#22d3ee}
+  body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+  .infographic{max-width:1100px;margin:0 auto;padding:48px 32px 64px}
+  .header{text-align:center;margin-bottom:56px;position:relative}
+  .header::after{content:'';position:absolute;bottom:-28px;left:50%;transform:translateX(-50%);width:120px;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent)}
+  .badge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--green);background:var(--green-glow);border:1px solid rgba(52,211,153,0.2);padding:6px 16px;border-radius:20px;margin-bottom:20px}
+  .header h1{font-size:38px;font-weight:800;letter-spacing:-0.5px;line-height:1.15;margin-bottom:12px;background:linear-gradient(135deg,#e2e8f0 0%,#94a3b8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .header .subtitle{font-size:16px;color:var(--text-muted);max-width:600px;margin:0 auto}
+  .comparison{display:grid;grid-template-columns:1fr 48px 1fr;gap:0;align-items:stretch;margin-bottom:56px}
+  .comp-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px}
+  .comp-card.before{border-color:rgba(248,113,113,0.25)}.comp-card.after{border-color:rgba(52,211,153,0.25)}
+  .comp-label{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+  .comp-card.before .comp-label{color:var(--red)}.comp-card.after .comp-label{color:var(--green)}
+  .dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+  .comp-card.before .dot{background:var(--red)}.comp-card.after .dot{background:var(--green)}
+  .comp-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+  .comp-row:last-child{border-bottom:none}
+  .comp-row .key{font-size:12px;color:var(--text-dim);font-weight:500;text-transform:uppercase;letter-spacing:0.5px}
+  .comp-row .val{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500}
+  .comp-card.before .val{color:var(--text-muted)}.comp-card.after .val{color:var(--green)}
+  .arrow-col{display:flex;align-items:center;justify-content:center}
+  .arrow-col svg{width:28px;height:28px;color:var(--text-dim)}
+  .section-title{font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:24px;text-align:center}
+  .phase-timeline{position:relative}
+  .phase-track{position:absolute;left:50%;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--blue),var(--purple),var(--green));transform:translateX(-50%);opacity:0.3}
+  .phase{position:relative;margin-bottom:32px;display:grid;grid-template-columns:1fr 48px 1fr;gap:0;align-items:start}
+  .phase:last-child{margin-bottom:0}
+  .phase-node{display:flex;align-items:center;justify-content:center;position:relative;z-index:2;padding-top:12px}
+  .phase-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;border:2px solid}
+  .phase:nth-child(1) .phase-dot{background:var(--blue-glow);border-color:var(--blue);color:var(--blue)}
+  .phase:nth-child(2) .phase-dot{background:var(--purple-glow);border-color:var(--purple);color:var(--purple)}
+  .phase:nth-child(3) .phase-dot{background:rgba(52,211,153,0.12);border-color:var(--green);color:var(--green)}
+  .phase-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;width:100%}
+  .phase:nth-child(1) .phase-card{border-color:rgba(96,165,250,0.2)}.phase:nth-child(2) .phase-card{border-color:rgba(167,139,250,0.2)}.phase:nth-child(3) .phase-card{border-color:rgba(52,211,153,0.2)}
+  .phase-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+  .phase-name{font-size:17px;font-weight:700;letter-spacing:-0.2px}
+  .phase:nth-child(1) .phase-name{color:var(--blue)}.phase:nth-child(2) .phase-name{color:var(--purple)}.phase:nth-child(3) .phase-name{color:var(--green)}
+  .phase-duration{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;padding:4px 10px;border-radius:6px;white-space:nowrap}
+  .phase:nth-child(1) .phase-duration{background:var(--blue-glow);color:var(--blue)}.phase:nth-child(2) .phase-duration{background:var(--purple-glow);color:var(--purple)}.phase:nth-child(3) .phase-duration{background:rgba(52,211,153,0.12);color:var(--green)}
+  .phase-desc{font-size:13px;color:var(--text-muted);margin-bottom:16px;line-height:1.55}
+  .task-list{list-style:none}
+  .task-list li{font-size:12.5px;color:var(--text-muted);padding:5px 0 5px 18px;position:relative;border-bottom:1px solid rgba(30,41,59,0.5)}
+  .task-list li:last-child{border-bottom:none}
+  .task-list li::before{content:'';position:absolute;left:0;top:12px;width:6px;height:6px;border-radius:2px}
+  .phase:nth-child(1) .task-list li::before{background:var(--blue);opacity:0.6}
+  .phase:nth-child(2) .task-list li::before{background:var(--purple);opacity:0.6}
+  .phase:nth-child(3) .task-list li::before{background:var(--green);opacity:0.6}
+  .phase-detail-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;width:100%}
+  .detail-title{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:14px}
+  .version-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)}
+  .version-row:last-child{border-bottom:none}
+  .version-row .vk{font-size:12px;color:var(--text-dim)}.version-row .vv{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;color:var(--text-muted)}
+  .critical-banner{background:linear-gradient(135deg,rgba(251,146,60,0.08),rgba(251,146,60,0.03));border:1px solid rgba(251,146,60,0.2);border-radius:14px;padding:24px 28px;margin-bottom:56px;display:flex;align-items:flex-start;gap:16px}
+  .cb-icon{font-size:24px;flex-shrink:0;margin-top:2px}
+  .cb-title{font-size:14px;font-weight:700;color:var(--orange);margin-bottom:6px}
+  .cb-text{font-size:13px;color:var(--text-muted);line-height:1.6}
+  .ns-grid{display:grid;grid-template-columns:1fr 24px 1fr;gap:4px 0;align-items:center;margin-top:14px;max-width:520px}
+  .ns-old,.ns-new{font-family:'JetBrains Mono',monospace;font-size:11px;padding:5px 10px;border-radius:6px}
+  .ns-old{background:rgba(248,113,113,0.08);color:#fca5a5;text-align:right;text-decoration:line-through;text-decoration-color:rgba(248,113,113,0.4)}
+  .ns-new{background:rgba(52,211,153,0.08);color:#6ee7b7}
+  .ns-arrow{text-align:center;color:var(--text-dim);font-size:12px}
+  .bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:56px}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px}
+  .stat-label{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:16px}
+  .stat-big{font-size:36px;font-weight:800;letter-spacing:-1px;line-height:1;margin-bottom:4px}
+  .stat-sub{font-size:13px;color:var(--text-dim)}
+  .risk-list{list-style:none}
+  .risk-item{padding:10px 0;border-bottom:1px solid var(--border)}
+  .risk-item:last-child{border-bottom:none}
+  .risk-label-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .risk-name{font-size:12px;color:var(--text-muted)}
+  .risk-level{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:4px}
+  .risk-level.high{background:rgba(248,113,113,0.15);color:var(--red)}
+  .risk-level.med{background:rgba(251,191,36,0.15);color:var(--yellow)}
+  .risk-level.low{background:rgba(52,211,153,0.15);color:var(--green)}
+  .risk-bar-bg{height:4px;background:var(--surface-2);border-radius:2px;overflow:hidden}
+  .risk-bar-fill{height:100%;border-radius:2px}
+  .risk-bar-fill.high{background:var(--red);width:85%}.risk-bar-fill.med{background:var(--yellow);width:55%}.risk-bar-fill.low{background:var(--green);width:25%}
+  .tools-section{margin-bottom:48px}
+  .tools-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+  .tool-chip{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 12px;text-align:center}
+  .tool-icon{font-size:22px;margin-bottom:8px}
+  .tool-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px}
+  .tool-desc{font-size:10px;color:var(--text-dim)}
+  .footer{text-align:center;padding-top:32px;border-top:1px solid var(--border)}
+  .footer p{font-size:12px;color:var(--text-dim)}
+  @media(max-width:800px){
+    .infographic{padding:24px 16px}.header h1{font-size:26px}
+    .comparison{grid-template-columns:1fr;gap:12px}.arrow-col{display:none}
+    .phase{grid-template-columns:1fr;gap:12px}.phase-node{display:none}.phase-track{display:none}
+    .phase-info.left,.phase-info.right{text-align:left}
+    .bottom-grid{grid-template-columns:1fr}.tools-grid{grid-template-columns:repeat(3,1fr)}
+  }
+</style>
+</head>
+<body>
+<div class="infographic">
+  <div class="header">
+    <div class="badge">Migration Overview</div>
+    <h1>Spring Framework 4.3 → Spring Boot 4</h1>
+    <p class="subtitle">Three-phase migration path from legacy Spring + JSF on Tomcat 9 to a modern Spring Boot 4 stack on Java 25</p>
+  </div>
+  <div class="comparison">
+    <div class="comp-card before">
+      <div class="comp-label"><span class="dot"></span> Current Stack</div>
+      <div class="comp-row"><span class="key">Java</span><span class="val">17</span></div>
+      <div class="comp-row"><span class="key">Spring</span><span class="val">Framework 4.3.30</span></div>
+      <div class="comp-row"><span class="key">Namespace</span><span class="val">javax.*</span></div>
+      <div class="comp-row"><span class="key">Servlet</span><span class="val">Tomcat 9 / Servlet 4.0</span></div>
+      <div class="comp-row"><span class="key">JSF</span><span class="val">Mojarra 2.2.14</span></div>
+      <div class="comp-row"><span class="key">UI</span><span class="val">PrimeFaces 13</span></div>
+      <div class="comp-row"><span class="key">Config</span><span class="val">XML (applicationContext.xml)</span></div>
+      <div class="comp-row"><span class="key">Deploy</span><span class="val">WAR → standalone Tomcat</span></div>
+      <div class="comp-row"><span class="key">DB Driver</span><span class="val">Oracle JDBC 23.6</span></div>
+    </div>
+    <div class="arrow-col">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </div>
+    <div class="comp-card after">
+      <div class="comp-label"><span class="dot"></span> Target Stack</div>
+      <div class="comp-row"><span class="key">Java</span><span class="val">25 (LTS)</span></div>
+      <div class="comp-row"><span class="key">Spring</span><span class="val">Boot 4.0 / Framework 7</span></div>
+      <div class="comp-row"><span class="key">Namespace</span><span class="val">jakarta.*</span></div>
+      <div class="comp-row"><span class="key">Servlet</span><span class="val">Tomcat 11 / Servlet 6.1</span></div>
+      <div class="comp-row"><span class="key">JSF</span><span class="val">Jakarta Faces 4.1</span></div>
+      <div class="comp-row"><span class="key">UI</span><span class="val">PrimeFaces 15</span></div>
+      <div class="comp-row"><span class="key">Config</span><span class="val">Java @Config + properties</span></div>
+      <div class="comp-row"><span class="key">Deploy</span><span class="val">Embedded Tomcat (JAR)</span></div>
+      <div class="comp-row"><span class="key">DB Driver</span><span class="val">Oracle ojdbc17 23.x</span></div>
+    </div>
+  </div>
+  <div class="critical-banner">
+    <div class="cb-icon">⚡</div>
+    <div>
+      <div class="cb-title">Critical Path: javax → jakarta Namespace Migration</div>
+      <div class="cb-text">The single largest effort — rewriting every <code style="background:rgba(251,146,60,0.1);padding:1px 5px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:12px">javax.*</code> import to <code style="background:rgba(52,211,153,0.1);padding:1px 5px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:12px">jakarta.*</code> across all Java files, XML configs, and 80+ XHTML Facelets pages.</div>
+      <div class="ns-grid">
+        <span class="ns-old">javax.servlet.*</span><span class="ns-arrow">→</span><span class="ns-new">jakarta.servlet.*</span>
+        <span class="ns-old">javax.faces.*</span><span class="ns-arrow">→</span><span class="ns-new">jakarta.faces.*</span>
+        <span class="ns-old">xmlns.jcp.org/jsf/html</span><span class="ns-arrow">→</span><span class="ns-new">jakarta.faces.html</span>
+        <span class="ns-old">javax.inject.*</span><span class="ns-arrow">→</span><span class="ns-new">jakarta.inject.*</span>
+      </div>
+    </div>
+  </div>
+  <div class="timeline-section">
+    <div class="section-title">Migration Phases</div>
+    <div class="phase-timeline">
+      <div class="phase-track"></div>
+  <div class="phase">
+    <div class="phase-info left">
+      <div class="phase-card">
+        <div class="phase-header">
+          <span class="phase-name">Phase 1 — The Bridge</span>
+          <span class="phase-duration">6–10 weeks</span>
+        </div>
+        <div class="phase-desc">Move from raw Spring 4.3 to Spring Boot 3.5 on Java 17. The heaviest lift — javax→jakarta, XML config conversion, and JoinFaces integration.</div>
+        <ul class="task-list">
+          <li>Replace Spring modules with Boot starters + parent POM</li>
+          <li>javax.* → jakarta.* across all Java, XML, 80+ XHTML files</li>
+          <li>Integrate JSF & PrimeFaces via JoinFaces 5.x</li>
+          <li>Convert XML config → @Configuration (use @ImportResource as bridge)</li>
+          <li>Register web.xml filters & listeners as Spring beans</li>
+          <li>Update Oracle JDBC to ojdbc17 artifact</li>
+          <li>Adapt JUnit 5 tests to @SpringBootTest</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase-node"><div class="phase-dot">1</div></div>
+    <div class="phase-info right">
+      <div class="phase-detail-box">
+        <div class="detail-title">Phase 1 Versions</div>
+        <div class="version-row"><span class="vk">Java</span><span class="vv">17</span></div>
+        <div class="version-row"><span class="vk">Spring Boot</span><span class="vv">3.5.x</span></div>
+        <div class="version-row"><span class="vk">Spring Framework</span><span class="vv">6.2.x</span></div>
+        <div class="version-row"><span class="vk">Jakarta EE</span><span class="vv">10</span></div>
+        <div class="version-row"><span class="vk">Tomcat</span><span class="vv">10.1.x</span></div>
+        <div class="version-row"><span class="vk">JoinFaces</span><span class="vv">5.4+ / 5.5.x</span></div>
+        <div class="version-row"><span class="vk">PrimeFaces</span><span class="vv">15.x (jakarta)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-info left">
+      <div class="phase-detail-box">
+        <div class="detail-title">Phase 2 Versions</div>
+        <div class="version-row"><span class="vk">Java</span><span class="vv">17</span></div>
+        <div class="version-row"><span class="vk">Spring Boot</span><span class="vv" style="color:var(--purple)">4.0.x ✦</span></div>
+        <div class="version-row"><span class="vk">Spring Framework</span><span class="vv" style="color:var(--purple)">7.x ✦</span></div>
+        <div class="version-row"><span class="vk">Jakarta EE</span><span class="vv" style="color:var(--purple)">11 ✦</span></div>
+        <div class="version-row"><span class="vk">Tomcat</span><span class="vv" style="color:var(--purple)">11.x ✦</span></div>
+        <div class="version-row"><span class="vk">JoinFaces</span><span class="vv" style="color:var(--purple)">6.0.x ✦</span></div>
+        <div class="version-row"><span class="vk">Jackson</span><span class="vv" style="color:var(--purple)">3.x ✦</span></div>
+      </div>
+    </div>
+    <div class="phase-node"><div class="phase-dot">2</div></div>
+    <div class="phase-info right">
+      <div class="phase-card">
+        <div class="phase-header">
+          <span class="phase-name">Phase 2 — Major Upgrade</span>
+          <span class="phase-duration">2–4 weeks</span>
+        </div>
+        <div class="phase-desc">Upgrade to Spring Boot 4 and Framework 7. With jakarta migration done, focus on removed APIs, modularization, and Jackson 3.</div>
+        <ul class="task-list">
+          <li>Bump parent POM to Spring Boot 4.0.x</li>
+          <li>Handle Boot 4 modular starter renames</li>
+          <li>Fix removed Spring 5.x / 6.x deprecated APIs</li>
+          <li>Update @ConfigurationProperties (no public fields)</li>
+          <li>Validate Jackson 3 serialization behavior</li>
+          <li>Upgrade JoinFaces to 6.0.x for Boot 4 compat</li>
+          <li>Test virtual threads (enabled by default in Boot 4)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-info left">
+      <div class="phase-card">
+        <div class="phase-header">
+          <span class="phase-name">Phase 3 — Runtime Upgrade</span>
+          <span class="phase-duration">1–2 weeks</span>
+        </div>
+        <div class="phase-desc">Upgrade JDK from 17 to 25 LTS. Mostly a runtime swap with compatibility checks and optional language modernization.</div>
+        <ul class="task-list">
+          <li>Set java.version=25 in Maven POM</li>
+          <li>Run jdeps --jdk-internals for violations</li>
+          <li>Add --add-opens flags if needed for reflection</li>
+          <li>Verify Oracle JDBC driver on Java 25</li>
+          <li>Measure baseline performance (startup, memory, latency)</li>
+          <li>Optional: adopt records, pattern matching, sealed classes</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase-node"><div class="phase-dot">3</div></div>
+    <div class="phase-info right">
+      <div class="phase-detail-box">
+        <div class="detail-title">Final Target Versions</div>
+        <div class="version-row"><span class="vk">Java</span><span class="vv" style="color:var(--green)">25 (LTS) ✦</span></div>
+        <div class="version-row"><span class="vk">Spring Boot</span><span class="vv">4.0.x</span></div>
+        <div class="version-row"><span class="vk">Spring Framework</span><span class="vv">7.x</span></div>
+        <div class="version-row"><span class="vk">Jakarta EE</span><span class="vv">11</span></div>
+        <div class="version-row"><span class="vk">Tomcat</span><span class="vv">11.x</span></div>
+        <div class="version-row"><span class="vk">Jakarta Faces</span><span class="vv">4.1</span></div>
+        <div class="version-row"><span class="vk">PrimeFaces</span><span class="vv">15.x</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="text-align:center;margin-top:28px;">
+  <div style="display:inline-flex;gap:8px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 24px;">
+    <span style="font-size:11px;color:var(--text-dim);font-weight:600;letter-spacing:1px;text-transform:uppercase;">+ Stabilization & QA</span>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--orange);background:rgba(251,146,60,0.12);padding:3px 10px;border-radius:5px;">2–4 weeks</span>
+  </div>
+</div>
+  </div>
+  <div style="height:56px"></div>
+  <div class="bottom-grid">
+    <div class="stat-card">
+      <div class="stat-label">Estimated Total Duration</div>
+      <div class="stat-big" style="color:var(--blue)">11–20</div>
+      <div class="stat-sub">weeks including stabilization & QA</div>
+      <div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div><div style="font-size:24px;font-weight:800;color:var(--orange);">80+</div><div style="font-size:11px;color:var(--text-dim);">XHTML pages to migrate</div></div>
+        <div><div style="font-size:24px;font-weight:800;color:var(--purple);">3</div><div style="font-size:11px;color:var(--text-dim);">generational leaps</div></div>
+        <div><div style="font-size:24px;font-weight:800;color:var(--cyan);">4.0→6.1</div><div style="font-size:11px;color:var(--text-dim);">Servlet API jump</div></div>
+        <div><div style="font-size:24px;font-weight:800;color:var(--green);">7</div><div style="font-size:11px;color:var(--text-dim);">major components upgraded</div></div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Risk Assessment</div>
+      <ul class="risk-list">
+        <li class="risk-item"><div class="risk-label-row"><span class="risk-name">JSF pages rendering differently</span><span class="risk-level high">High</span></div><div class="risk-bar-bg"><div class="risk-bar-fill high"></div></div></li>
+        <li class="risk-item"><div class="risk-label-row"><span class="risk-name">PrimeFaces component changes</span><span class="risk-level high">High</span></div><div class="risk-bar-bg"><div class="risk-bar-fill high"></div></div></li>
+        <li class="risk-item"><div class="risk-label-row"><span class="risk-name">3rd-party Jakarta incompatibility</span><span class="risk-level med">Medium</span></div><div class="risk-bar-bg"><div class="risk-bar-fill med"></div></div></li>
+        <li class="risk-item"><div class="risk-label-row"><span class="risk-name">Virtual threads + ThreadLocal</span><span class="risk-level med">Medium</span></div><div class="risk-bar-bg"><div class="risk-bar-fill med"></div></div></li>
+        <li class="risk-item"><div class="risk-label-row"><span class="risk-name">JoinFaces Boot 4 version lag</span><span class="risk-level med">Medium</span></div><div class="risk-bar-bg"><div class="risk-bar-fill med"></div></div></li>
+        <li class="risk-item"><div class="risk-label-row"><span class="risk-name">JdbcTemplate API breakage</span><span class="risk-level low">Low</span></div><div class="risk-bar-bg"><div class="risk-bar-fill low"></div></div></li>
+      </ul>
+    </div>
+  </div>
+  <div class="tools-section">
+    <div class="section-title">Recommended Tooling</div>
+    <div class="tools-grid">
+      <div class="tool-chip"><div class="tool-icon">🔄</div><div class="tool-name">OpenRewrite</div><div class="tool-desc">Automated code migration</div></div>
+      <div class="tool-chip"><div class="tool-icon">🔍</div><div class="tool-name">jdeps</div><div class="tool-desc">Internal API scanner</div></div>
+      <div class="tool-chip"><div class="tool-icon">⚠️</div><div class="tool-name">jdeprscan</div><div class="tool-desc">Deprecated API detection</div></div>
+      <div class="tool-chip"><div class="tool-icon">🧠</div><div class="tool-name">IntelliJ IDEA</div><div class="tool-desc">Jakarta migration + Java 25</div></div>
+      <div class="tool-chip"><div class="tool-icon">🔗</div><div class="tool-name">JoinFaces</div><div class="tool-desc">JSF ↔ Spring Boot bridge</div></div>
+    </div>
+  </div>
+  <div class="footer">
+    <p>Migration guide for WAR-deployed Spring 4.3 + JSF 2.2 + PrimeFaces 13 &nbsp;·&nbsp; Maven &nbsp;·&nbsp; JUnit 5 &nbsp;·&nbsp; Oracle DB &nbsp;·&nbsp; 80+ XHTML pages</p>
+  </div>
+</div>
+</body>
+</html>
