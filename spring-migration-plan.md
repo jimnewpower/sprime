@@ -105,6 +105,48 @@ The table below maps every major dependency from its current version to its targ
 
 **1.2 Collapse 4-Project Structure** into a single multi-module Maven project. This is not strictly required for the migration, but it simplifies dependency management and makes the OpenRewrite recipes more effective. The current structure with separate ETER_Services, ERMobile, ERPlus, and EventTracker projects creates complexity in managing dependencies and applying consistent upgrades. A single multi-module project with clear module boundaries (e.g., core, web, mobile) will streamline the migration process.
 
+Single-project structure:  
+```
+erplus  
+├───src  
+│   ├───main  
+│   │   ├───java  
+│   │   │   └───gov  
+│   │   │       └───snl  
+│   │   │           └───app  
+│   │   │               ├───er
+│   │   │               ├───actions  
+│   │   │               ├───api  
+│   │   │               ├───bean  
+│   │   │               ├───controller 
+│   │   │               ├───converter
+│   │   │               ├───dao
+│   │   │               ├───exception  
+│   │   │               ├───filter
+│   │   │               └───mapper
+│   │   │               └───...
+│   │   ├───resources  
+│   │   │   ├───static  
+│   │   │   │   └───error  
+│   │   │   └───templates  
+│   │   └───webapp  
+│   │       ├───access  
+│   │       ├───admin  
+│   │       ├───approve  
+│   │       ├───...
+│   │       ├───resources  
+│   │       │   └───images  
+│   │       └───WEB-INF  
+│   │       └───index.xhtml  
+│   └───test  
+│       └───java  
+│           └───gov  
+│               └───snl  
+│                   └───app  
+├─ pom.xml
+├─ readme.md
+```
+
 **1.3 Upgrade Spring Framework from 4.3.30 to 5.3.x (latest 5.3 patch).** Key breaking changes in Spring 5.0+: removal of several deprecated classes in spring-webmvc, changes to default content negotiation, updated Jackson/databind requirements. The [Spring 4 → 5 migration guide](https://docs.spring.io/spring-integration/reference/changes-4.3-5.0.html) should be reviewed carefully.
 
 **1.4 Upgrade MyBatis-Spring from 1.3.3 to 2.1.x.** MyBatis-Spring 2.1.x is the last version compatible with Spring 5\. This is a significant jump (1.3 → 2.1) that may require changes to SqlSessionFactoryBean configuration. Review the MyBatis-Spring migration notes.
