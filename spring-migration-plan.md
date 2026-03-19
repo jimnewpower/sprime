@@ -96,22 +96,24 @@ The table below maps every major dependency from its current version to its targ
 
 *Objective: Upgrade Spring Framework to 5.3.x (the last javax-based Spring release) and update MyBatis-Spring to its javax-compatible latest. This resolves the majority of Spring API deprecations and breaking changes before the namespace wall. Since it is already on Java 17, there is no JDK upgrade needed for this phase.*
 
-**1.0 Mitigate properties sprawl: 
+**1.0 Mitigate properties sprawl:** 
 - remove AppSettings.properties from `ERMobile/env`. 
 - Identify unused properties and remove them from ETER_Services AppSettings.properties.
 - Bypass `Constants.getProperties()`, `Constants.getEnvironment()`, etc. 
 - Use standard Spring property accessors.
 - Remove dependencies upon `snl.app.Application` to obtain properties.
 
-**1.1 Upgrade Spring Framework from 4.3.30 to 5.3.x (latest 5.3 patch).** Key breaking changes in Spring 5.0+: removal of several deprecated classes in spring-webmvc, changes to default content negotiation, updated Jackson/databind requirements. The [Spring 4 → 5 migration guide](https://docs.spring.io/spring-integration/reference/changes-4.3-5.0.html) should be reviewed carefully.
+**1.2 Collapse 4-Project Structure** into a single multi-module Maven project. This is not strictly required for the migration, but it simplifies dependency management and makes the OpenRewrite recipes more effective. The current structure with separate ETER_Services, ERMobile, ERPlus, and EventTracker projects creates complexity in managing dependencies and applying consistent upgrades. A single multi-module project with clear module boundaries (e.g., core, web, mobile) will streamline the migration process.
 
-**1.2 Upgrade MyBatis-Spring from 1.3.3 to 2.1.x.** MyBatis-Spring 2.1.x is the last version compatible with Spring 5\. This is a significant jump (1.3 → 2.1) that may require changes to SqlSessionFactoryBean configuration. Review the MyBatis-Spring migration notes.
+**1.3 Upgrade Spring Framework from 4.3.30 to 5.3.x (latest 5.3 patch).** Key breaking changes in Spring 5.0+: removal of several deprecated classes in spring-webmvc, changes to default content negotiation, updated Jackson/databind requirements. The [Spring 4 → 5 migration guide](https://docs.spring.io/spring-integration/reference/changes-4.3-5.0.html) should be reviewed carefully.
 
-**1.3 Address deprecation warnings.** Spring 5.3 deprecated many APIs that were removed in 6.0. Fix these now while still on the javax stack so the Phase 2 cut-over is cleaner. Key areas: WebMvcConfigurerAdapter → WebMvcConfigurer, SimpleClientHttpRequestFactory changes, and any removed XML schema namespaces.
+**1.4 Upgrade MyBatis-Spring from 1.3.3 to 2.1.x.** MyBatis-Spring 2.1.x is the last version compatible with Spring 5\. This is a significant jump (1.3 → 2.1) that may require changes to SqlSessionFactoryBean configuration. Review the MyBatis-Spring migration notes.
 
-**1.4 Run OpenRewrite for automated fixes (optional but recommended).** Use the org.openrewrite.java.spring.framework.UpgradeSpringFramework\_5\_3 recipe to catch mechanical changes automatically.
+**1.5 Address deprecation warnings.** Spring 5.3 deprecated many APIs that were removed in 6.0. Fix these now while still on the javax stack so the Phase 2 cut-over is cleaner. Key areas: WebMvcConfigurerAdapter → WebMvcConfigurer, SimpleClientHttpRequestFactory changes, and any removed XML schema namespaces.
 
-**1.5 Full regression testing on Tomcat 9 with Java 17\.** Deploy and test thoroughly. Every JSF page, every MyBatis query. This is the final javax checkpoint.
+**1.6 Run OpenRewrite for automated fixes (optional but recommended).** Use the org.openrewrite.java.spring.framework.UpgradeSpringFramework\_5\_3 recipe to catch mechanical changes automatically.
+
+**1.7 Full regression testing on Tomcat 9 with Java 17\.** Deploy and test thoroughly. Every JSF page, every MyBatis query. This is the final javax checkpoint.
 
 | Critical Warning: Spring 4 → 5 Breaking Changes Spring 5 dropped support for several things silently present in 4.x: Tiles integration, Velocity templates, XMLBeanFactory, and various deprecated web utilities. If the JSF integration layer used any Spring 4-specific web utilities, they may need replacement. Check spring-webmvc carefully. |
 | :---- |
