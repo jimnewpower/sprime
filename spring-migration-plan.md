@@ -1,39 +1,14 @@
-  
-**ErPlus Application Migration Plan**
+# **ErPlus Application Migration Plan**
 
+```
 Spring 4.3 / JSF 2.2 / Java 17 / Tomcat 9
-
-↓
-
+to:
 Spring 6.2 / Jakarta Faces 4.0 / Java 21 / Tomcat 10.1
 
 Target: Java 21  |  Jakarta EE 10  |  Incremental Migration
+```
 
 Prepared: March 2026
-
-**Table of Contents**
-
-**1\.  Executive Summary**
-
-**2\.  Current vs Target Dependency Matrix**
-
-**3\.  Phased Migration Plan**
-
-3.0  Phase 0: Preparation and Test Infrastructure
-
-3.1  Phase 1: Spring 4.3 → Spring 5.3 (Java 17, Tomcat 9\)
-
-3.2  Phase 2: The Big Cut-Over — javax → jakarta \+ Spring 6.2 \+ Tomcat 10.1
-
-3.3  Phase 3: Stabilization and Optimization
-
-**4\.  Risk Register**
-
-**5\.  OpenRewrite Quick-Start for Maven**
-
-**6\.  Estimated Timeline Summary**
-
-**7\.  Future Considerations**
 
 # **Executive Summary**
 
@@ -46,9 +21,9 @@ targeting the Jakarta EE 10 (jakarta namespace) platform.
 
 ## **Why This Migration Is Necessary**
 
-**Security exposure is the primary driver.** Spring 4.x no longer receives security patches. When CVEs are discovered in the framework (and they continue to be — Spring4Shell in 2022 being the most prominent example), this version will never be patched. The same applies to Hibernate Validator 5.0.1, javax.faces 2.2.14, and OmniFaces 1.14 — all well past their support windows.
+**Security exposure is the primary driver.** Spring 4.x no longer receives security patches. When CVEs are discovered in the framework (and they continue to be Spring4Shell in 2022 being the most prominent example), this version will never be patched. The same applies to Hibernate Validator 5.0.1, javax.faces 2.2.14, and OmniFaces 1.14 all well past their support windows.
 
-**Java ecosystem compatibility is narrowing.** Spring 4.x targets Java 6–8. Modern JDK releases (17, 21 LTS) offer substantial performance improvements — ZGC/Shenandoah garbage collectors, virtual threads, compact strings, improved JIT compilation — none of which the current stack can reliably leverage. As Oracle and the broader ecosystem drop older JDK support, the deployment surface shrinks.
+**Java ecosystem compatibility is narrowing.** Spring 4.x targets Java 8. Modern JDK releases (17, 21 LTS) offer substantial performance improvements ZGC/Shenandoah garbage collectors, virtual threads, compact strings, improved JIT compilation — none of which the current stack can reliably leverage. As Oracle and the broader ecosystem drop older JDK support, the deployment surface shrinks. The good news: we have already migrated from Java 8 to 17.
 
 **Dependency isolation is eroding.** MyBatis-Spring 1.3.3 predates Spring 5 compatibility work. Tomcat JDBC 9.x is already ahead of Spring 4.x's expected Servlet API level. javax.servlet 3.1.0 prohibits Servlet 4.0+ features. These version mismatches create subtle integration bugs that are difficult to diagnose and will worsen as any single dependency is updated.
 
@@ -94,7 +69,7 @@ The table below maps every major dependency from its current version to its targ
 
 ## **Phase 0: Preparation and Test Infrastructure**
 
-**Estimated effort: 2–4 weeks. This phase makes no production code changes but is critical for risk reduction.**
+**Estimated effort: 2-4 weeks. This phase makes no production code changes but is critical for risk reduction.**
 
 *Objective: Build a safety net before touching any dependencies. With moderate test coverage, this is the single highest-ROI investment in the entire migration.*
 
@@ -115,11 +90,18 @@ The table below maps every major dependency from its current version to its targ
 | Exit Criteria for Phase 0 All existing tests pass. CI/CD pipeline is reliable. Dependency inventory is complete. Critical JSF flows have integration test coverage. PrimeFaces and OmniFaces usage inventories are documented. Team is aligned on the migration branch strategy. |
 | :---- |
 
-## **Phase 1: Spring 4.3 → Spring 5.3 (Java 17, Tomcat 9 — still javax)**
+## **Phase 1: Spring 4.3 - Spring 5.3 (Java 17, Tomcat 9 still javax)**
 
-**Estimated effort: 2–4 weeks. Moderate risk. This is the largest behavioral change within the javax world.**
+**Estimated effort: 2-4 weeks. Moderate risk. This is the largest behavioral change within the javax world.**
 
 *Objective: Upgrade Spring Framework to 5.3.x (the last javax-based Spring release) and update MyBatis-Spring to its javax-compatible latest. This resolves the majority of Spring API deprecations and breaking changes before the namespace wall. Since it is already on Java 17, there is no JDK upgrade needed for this phase.*
+
+**1.0 Mitigate properties sprawl: 
+- remove AppSettings.properties from `ERMobile/env`. 
+- Identify unused properties and remove them from ETER_Services AppSettings.properties.
+- Bypass `Constants.getProperties()`, `Constants.getEnvironment()`, etc. 
+- Use standard Spring property accessors.
+- Remove dependencies upon `snl.app.Application` to obtain properties.
 
 **1.1 Upgrade Spring Framework from 4.3.30 to 5.3.x (latest 5.3 patch).** Key breaking changes in Spring 5.0+: removal of several deprecated classes in spring-webmvc, changes to default content negotiation, updated Jackson/databind requirements. The [Spring 4 → 5 migration guide](https://docs.spring.io/spring-integration/reference/changes-4.3-5.0.html) should be reviewed carefully.
 
@@ -134,40 +116,40 @@ The table below maps every major dependency from its current version to its targ
 | Critical Warning: Spring 4 → 5 Breaking Changes Spring 5 dropped support for several things silently present in 4.x: Tiles integration, Velocity templates, XMLBeanFactory, and various deprecated web utilities. If the JSF integration layer used any Spring 4-specific web utilities, they may need replacement. Check spring-webmvc carefully. |
 | :---- |
 
-## **Phase 2: The Big Cut-Over — javax → jakarta \+ Spring 6.2 \+ Tomcat 10.1**
+## **Phase 2: The Big Cut-Over javax to jakarta \+ Spring 6.2 \+ Tomcat 10.1**
 
-**Estimated effort: 4–8 weeks. HIGH RISK. This is the coordinated namespace migration. All Jakarta EE dependencies change simultaneously.**
+**Estimated effort: 4-8 weeks. HIGH RISK. This is the coordinated namespace migration. All Jakarta EE dependencies change simultaneously.**
 
 *Objective: Migrate the entire application from the javax namespace to the jakarta namespace. This requires simultaneous upgrades of Spring, Tomcat, JSF/PrimeFaces, Servlet API, EL, CDI, Bean Validation, OmniFaces, and all related libraries. This cannot be done incrementally.*
 
-| Why this must be a single coordinated phase The javax → jakarta rename is a binary-incompatible change. A class compiled against javax.servlet.http.HttpServletRequest cannot be passed to a method expecting jakarta.servlet.http.HttpServletRequest. All libraries in the dependency tree must agree on which namespace they use. There is no gradual migration path across this boundary. |
+| Why this must be a single coordinated phase The javax jakarta rename is a binary-incompatible change. A class compiled against javax.servlet.http.HttpServletRequest cannot be passed to a method expecting jakarta.servlet.http.HttpServletRequest. All libraries in the dependency tree must agree on which namespace they use. There is no gradual migration path across this boundary. |
 | :---- |
 
 **2.1 Run OpenRewrite to automate the mechanical migration.** Use these recipes in sequence: (a) org.openrewrite.java.migrate.jakarta.JavaxMigrationToJakarta for the namespace change, (b) org.openrewrite.java.spring.framework.UpgradeSpringFramework\_6\_0 for Spring-specific changes, (c) org.openrewrite.java.migrate.jakarta.JakartaEE10 for Jakarta EE 10 API updates. Run in dry-run mode first to review changes.
 
 **2.2 Update all Maven dependencies simultaneously. Key changes:**
 
-Spring Framework: 5.3.x → 6.2.x (latest stable)
+Spring Framework: 5.3.x - 6.2.x (latest stable)
 
-Servlet API: javax.servlet:javax.servlet-api:3.1 → jakarta.servlet:jakarta.servlet-api:6.0.0 (scope: provided)
+Servlet API: javax.servlet:javax.servlet-api:3.1 - jakarta.servlet:jakarta.servlet-api:6.0.0 (scope: provided)
 
-JSF: org.glassfish:javax.faces:2.2.14 → org.glassfish:jakarta.faces:4.0.x (Mojarra 4.0 impl)
+JSF: org.glassfish:javax.faces:2.2.14 - org.glassfish:jakarta.faces:4.0.x (Mojarra 4.0 impl)
 
-EL: javax.el:javax.el-api:3.0.0 → jakarta.el:jakarta.el-api:5.0.x
+EL: javax.el:javax.el-api:3.0.0 - jakarta.el:jakarta.el-api:5.0.x
 
-CDI: javax.enterprise:cdi-api:2.0 → jakarta.enterprise:jakarta.enterprise.cdi-api:4.0.x
+CDI: javax.enterprise:cdi-api:2.0 - jakarta.enterprise:jakarta.enterprise.cdi-api:4.0.x
 
-Bean Validation: org.hibernate:hibernate-validator:5.0.1.Final → org.hibernate.validator:hibernate-validator:8.0.x (note: groupId changed)
+Bean Validation: org.hibernate:hibernate-validator:5.0.1.Final - org.hibernate.validator:hibernate-validator:8.0.x (note: groupId changed)
 
-PrimeFaces: 13.0.10 → 15.0.x with \<classifier\>jakarta\</classifier\>
+PrimeFaces: 13.0.10 - 15.0.x with \<classifier\>jakarta\</classifier\>
 
-OmniFaces: 1.14 → 4.7.2 (coordinate swap only; Faces.redirect(), Ajax.oncomplete(), and \<o:importConstants\> all unchanged)
+OmniFaces: 1.14 - 4.7.2 (coordinate swap only; Faces.redirect(), Ajax.oncomplete(), and \<o:importConstants\> all unchanged)
 
-MyBatis-Spring: 2.1.x → 3.0.x (Spring 6 compatible)
+MyBatis-Spring: 2.1.x - 3.0.x (Spring 6 compatible)
 
-JSTL: javax.servlet:jstl:1.2 → jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api:3.0.x
+JSTL: javax.servlet:jstl:1.2 - jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api:3.0.x
 
-Tomcat JDBC: 9.0.x → 10.1.x
+Tomcat JDBC: 9.0.x - 10.1.x
 
 **2.3 Upgrade Java to 21 (recommended to do in this phase).** Because already on Java 17, Spring 6.2 will compile and run without a JDK change. However, this is the natural point to upgrade to Java 21 for LTS alignment and virtual thread support with Tomcat 10.1. Update maven-compiler-plugin source/target to 21 and verify with the full test suite.
 
@@ -178,7 +160,7 @@ Inventory XML Configuration Files
 * `applicationContext.xml` (root context: datasource, MyBatis, transactions, services)  
 * `dispatcher-servlet.xml` or `spring-mvc.xml` (web context: view resolvers, interceptors)  
 * `web.xml` (servlet/filter/listener declarations)  
-* Possibly `faces-config.xml` (JSF navigation, managed beans — this is JSF-specific, not Spring XML)
+* Possibly `faces-config.xml` (JSF navigation, managed beans - this is JSF-specific, not Spring XML)
 
 **Do not touch `faces-config.xml` in this step.** That's JSF configuration, not Spring configuration. It follows different rules.
 
@@ -217,7 +199,7 @@ Use sed/grep for bulk replacement, then manually verify each page.
 
 ## **Phase 3: Stabilization and Optimization**
 
-**Estimated effort: 2–4 weeks. Low–medium risk. Cleanup and optimization after the big cut-over.**
+**Estimated effort: 2-4 weeks. Low–medium risk. Cleanup and optimization after the big cut-over.**
 
 **3.1 Fix remaining runtime issues.** Phase 2 testing will surface issues. Common problems: serialization issues with session-scoped beans, CDI scope resolution differences, EL expression evaluation changes between EL 3.0 and 5.0.
 
