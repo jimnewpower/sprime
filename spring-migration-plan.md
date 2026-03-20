@@ -19,9 +19,19 @@ This document provides a phased migration plan for upgrading the ErPlus enterpri
 
 targeting the Jakarta EE 10 (jakarta namespace) platform.
 
+## Technical Goals
+- Organize code into a single project instead of 4 separate projects.
+- Remove `spring-webmvc` dependency, servlets, and `.jsp` files.
+- Remove EventTracker project and merge/migrate its functionality into the main application.
+- Migrate AppSettings.properties into Spring property sources (`application.properties`), utilize `%local%`, `%dev%`, `%qual%`, and `%prod%` profiles, and eliminate `Constants.getProperties()` usage.
+- Remove `node.js` dependency and any related build steps.
+- Add scripts for building and running the application locally with Java 21 and Tomcat 10.1.
+- Add unit test suite to deployment pipeline for regression safety net during migration.
+- Add test coverage tool and report baseline coverage before starting migration (e.g., JaCoCo).
+
 ## **Why This Migration Is Necessary**
 
-**Security exposure is the primary driver.** Spring 4.x no longer receives security patches. When CVEs are discovered in the framework (and they continue to be Spring4Shell in 2022 being the most prominent example), this version will never be patched. The same applies to Hibernate Validator 5.0.1, javax.faces 2.2.14, and OmniFaces 1.14 all well past their support windows.
+**Security exposure is the primary driver.** Spring 4.x no longer receives security patches. When CVEs are discovered in the framework (and they continue to be Spring4Shell in 2022 being the most prominent example), this version will never be patched. The same applies to Hibernate Validator 5.0.1, `javax.faces` 2.2.14, and OmniFaces 1.14 all well past their support windows.
 
 **Java ecosystem compatibility is narrowing.** Spring 4.x targets Java 8. Modern JDK releases (17, 21 LTS) offer substantial performance improvements ZGC/Shenandoah garbage collectors, virtual threads, compact strings, improved JIT compilation — none of which the current stack can reliably leverage. As Oracle and the broader ecosystem drop older JDK support, the deployment surface shrinks. The good news: we have already migrated from Java 8 to 17.
 
@@ -143,6 +153,7 @@ erplus
 │           └───gov  
 │               └───snl  
 │                   └───app  
+├─ Dockerfile
 ├─ pom.xml
 ├─ readme.md
 ```
@@ -157,7 +168,7 @@ erplus
 
 **1.7 Full regression testing on Tomcat 9 with Java 17\.** Deploy and test thoroughly. Every JSF page, every MyBatis query. This is the final javax checkpoint.
 
-| Critical Warning: Spring 4 → 5 Breaking Changes Spring 5 dropped support for several things silently present in 4.x: Tiles integration, Velocity templates, XMLBeanFactory, and various deprecated web utilities. If the JSF integration layer used any Spring 4-specific web utilities, they may need replacement. Check spring-webmvc carefully. |
+| Warning: Spring 4 → 5 Breaking Changes Spring 5 dropped support for several things silently present in 4.x: Tiles integration, Velocity templates, XMLBeanFactory, and various deprecated web utilities. If the JSF integration layer used any Spring 4-specific web utilities, they may need replacement. Check spring-webmvc carefully. |
 | :---- |
 
 ## **Phase 2: The Big Cut-Over javax to jakarta \+ Spring 6.2 \+ Tomcat 10.1**
@@ -301,3 +312,332 @@ This timeline assumes a single developer or small team working primarily on the 
 
 **Spring Boot adoption:** Current project uses Spring Framework directly (no Spring Boot). Once on Spring 6.2, adopting Spring Boot 3.4.x is feasible and would provide auto-configuration, embedded Tomcat option, and simplified dependency management. However, this is a significant architectural change for a WAR-based JSF application and should be evaluated carefully.
 
+# Appendix A: Spring XML to Java Configuration Migration
+
+This is a substantial but well-understood migration path: Spring 4.3 → presumably 5.x or 6.x, JSF/PrimeFaces, MyBatis, Tomcat.
+
+## First: Clarify the Strategic Context
+
+The migration from XML to Java configuration is **not strictly required** for a Spring version upgrade. Spring 5.x still fully supports XML configuration. Spring 6.x also supports it, though some namespace handlers have changed.
+
+Reasoning for migrating to Java configuration are:
+
+- Spring Boot adoption (which strongly favors Java config)
+- Spring 6.x / Jakarta EE 9+ migration (where some XML namespace schemas changed, making it a good time to convert)
+- Maintainability preferences
+
+So the question is: **are you upgrading to Spring 5.x or 6.x?** This matters because Spring 6.x requires Jakarta EE 9+ (the `javax.*` → `jakarta.*` namespace migration), which affects nearly every dependency you listed. Your current stack is entirely `javax.*`-based.
+
+I'll proceed with the XML → Java config walkthrough regardless, since it applies to either target version.
+
+---
+
+## Step 1: Inventory Your XML Configuration Files
+
+Typically in a project like yours, you'll have files like:
+
+- `applicationContext.xml` (root context: datasource, MyBatis, transactions, services)
+- `dispatcher-servlet.xml` or `spring-mvc.xml` (web context: view resolvers, interceptors)
+- `web.xml` (servlet/filter/listener declarations)
+- Possibly `faces-config.xml` (JSF navigation, managed beans — this is JSF-specific, not Spring XML)
+
+**Do not touch `faces-config.xml` in this step.** That's JSF configuration, not Spring configuration. It follows different rules.
+
+---
+
+## Step 2: Replace `web.xml` with a Java-Based Initializer
+
+Your current `web.xml` likely declares `DispatcherServlet`, `ContextLoaderListener`, and possibly a JSF `FacesServlet` plus filters.
+
+**Create an `AbstractAnnotationConfigDispatcherServletInitializer` subclass:**
+
+```java
+public class AppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
+
+    @Override
+    protected Class<?>[] getRootConfigClasses() {
+        // These replace applicationContext.xml
+        return new Class<?>[] { AppConfig.class, DataSourceConfig.class, MyBatisConfig.class };
+    }
+
+    @Override
+    protected Class<?>[] getServletConfigClasses() {
+        // These replace dispatcher-servlet.xml
+        return new Class<?>[] { WebMvcConfig.class };
+    }
+
+    @Override
+    protected String[] getServletMappings() {
+        return new String[] { "/" };
+    }
+
+    @Override
+    protected Filter[] getServletFilters() {
+        // Add any filters that were in web.xml
+        CharacterEncodingFilter encodingFilter = new CharacterEncodingFilter();
+        encodingFilter.setEncoding("UTF-8");
+        encodingFilter.setForceEncoding(true);
+        return new Filter[] { encodingFilter };
+    }
+}
+```
+
+**Critical nuance for your stack:** Since you're using JSF/PrimeFaces alongside Spring MVC, you have a dual-servlet situation. `FacesServlet` needs to be registered too. `AbstractAnnotationConfigDispatcherServletInitializer` only handles `DispatcherServlet`. You'll need a separate `ServletContainerInitializer` or a `ServletContextListener` for JSF:
+
+```java
+public class JsfInitializer implements ServletContainerInitializer {
+    @Override
+    public void onStartup(Set<Class<?>> classes, ServletContext ctx) throws ServletException {
+        // Register FacesServlet
+        ServletRegistration.Dynamic facesServlet = ctx.addServlet("FacesServlet",
+            "javax.faces.webapp.FacesServlet");
+        facesServlet.setLoadOnStartup(1);
+        facesServlet.addMapping("*.xhtml");
+    }
+}
+```
+
+**However** — and this is important — Mojarra (your `javax.faces` implementation at 2.2.14) already ships its own `ServletContainerInitializer` (`com.sun.faces.config.FacesInitializer`). In most Tomcat deployments, JSF self-registers if the JAR is on the classpath. So you may not need to manually register `FacesServlet` at all. Test this before writing boilerplate.
+
+**Alternatively**, use the hybrid approach: keep a minimal `web.xml` just for JSF-specific entries and do Spring config in Java. This is pragmatic and avoids fighting JSF's initialization expectations. There's no award for zero XML.
+
+---
+
+## Step 3: Migrate the Root Application Context
+
+This is where your datasource, transaction manager, MyBatis session factory, and component scanning live.
+
+**DataSource and Transaction Configuration:**
+
+```java
+@Configuration
+@EnableTransactionManagement
+public class DataSourceConfig {
+
+    @Bean
+    public DataSource dataSource() {
+        // Matches your Tomcat JDBC 9.0.108 pool
+        org.apache.tomcat.jdbc.pool.DataSource ds = new org.apache.tomcat.jdbc.pool.DataSource();
+        ds.setDriverClassName("oracle.jdbc.OracleDriver");
+        ds.setUrl("jdbc:oracle:thin:@//host:1521/service");
+        ds.setUsername("...");
+        ds.setPassword("...");
+        // Pool settings that were in your XML
+        ds.setMaxActive(50);
+        ds.setMinIdle(5);
+        ds.setValidationQuery("SELECT 1 FROM DUAL");
+        ds.setTestOnBorrow(true);
+        return ds;
+    }
+
+    @Bean
+    public PlatformTransactionManager transactionManager(DataSource dataSource) {
+        return new DataSourceTransactionManager(dataSource);
+    }
+}
+```
+
+**Externalize properties.** Don't hardcode connection strings:
+
+```java
+@Configuration
+@PropertySource("classpath:application.properties")
+public class DataSourceConfig {
+
+    @Autowired
+    private Environment env;
+
+    @Bean
+    public DataSource dataSource() {
+        org.apache.tomcat.jdbc.pool.DataSource ds = new org.apache.tomcat.jdbc.pool.DataSource();
+        ds.setDriverClassName(env.getProperty("db.driver"));
+        ds.setUrl(env.getProperty("db.url"));
+        ds.setUsername(env.getProperty("db.username"));
+        ds.setPassword(env.getProperty("db.password"));
+        return ds;
+    }
+}
+```
+
+---
+
+## Step 4: Migrate MyBatis Configuration
+
+Your `mybatis-spring` 1.3.3 uses `SqlSessionFactoryBean` and `MapperScannerConfigurer`. The Java config equivalent:
+
+```java
+@Configuration
+@MapperScan("com.yourapp.mapper")  // replaces MapperScannerConfigurer XML
+public class MyBatisConfig {
+
+    @Bean
+    public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
+        SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
+        factoryBean.setDataSource(dataSource);
+
+        // If you have a mybatis-config.xml for settings/type aliases
+        factoryBean.setConfigLocation(
+            new ClassPathResource("mybatis-config.xml"));
+
+        // If you use XML mapper files
+        factoryBean.setMapperLocations(
+            new PathMatchingResourcePatternResolver()
+                .getResources("classpath:mappers/**/*.xml"));
+
+        return factoryBean.getObject();
+    }
+}
+```
+
+**Important note:** MyBatis mapper XML files (the SQL files) are **not** Spring configuration. Don't try to convert those to Java. They stay as XML. The only thing you're converting here is how the `SqlSessionFactory` and mapper scanning are *declared* — from Spring XML bean definitions to `@Bean` methods.
+
+---
+
+## Step 5: Migrate the Web/MVC Context
+
+```java
+@Configuration
+@EnableWebMvc
+@ComponentScan(basePackages = "com.yourapp.controller")
+public class WebMvcConfig implements WebMvcConfigurer {
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/resources/**")
+                .addResourceLocations("/resources/");
+    }
+
+    @Override
+    public void configureViewResolvers(ViewResolverRegistry registry) {
+        // Only if you have non-JSF views resolved by Spring MVC
+        registry.jsp("/WEB-INF/views/", ".jsp");
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        // Migrate any interceptors from your XML
+    }
+
+    @Bean
+    public Validator validator() {
+        // Wires up your Hibernate Validator 5.0.1
+        return new LocalValidatorFactoryBean();
+    }
+}
+```
+
+**Stack-specific concern:** If your application is primarily JSF/PrimeFaces and doesn't actually use Spring MVC's `DispatcherServlet` for request handling (i.e., all pages are `.xhtml` served by `FacesServlet`), then you may not need `@EnableWebMvc` or a `WebMvcConfig` at all. Many Spring + JSF apps use Spring only for the application context (dependency injection, transactions) and delegate all HTTP handling to JSF. Audit whether you actually have a `DispatcherServlet` mapped in your current `web.xml` before creating this class.
+
+---
+
+## Step 6: Migrate Component Scanning and Miscellaneous Beans
+
+If your XML has `<context:component-scan>`, that becomes:
+
+```java
+@Configuration
+@ComponentScan(basePackages = {
+    "com.yourapp.service",
+    "com.yourapp.repository",
+    "com.yourapp.util"
+})
+public class AppConfig {
+    // Any remaining @Bean definitions for beans that were
+    // manually declared in XML
+}
+```
+
+---
+
+## Step 7: Migrate Spring-JSF Integration
+
+Your Spring + JSF integration likely uses one of these mechanisms:
+
+1. **`SpringBeanFacesELResolver`** — declared in `faces-config.xml`, lets JSF EL expressions resolve Spring beans
+2. **Spring's `DelegatingVariableResolver`** (older approach)
+
+This stays in `faces-config.xml` — it's JSF configuration, not Spring:
+
+```xml
+<application>
+    <el-resolver>
+        org.springframework.web.jsf.el.SpringBeanFacesELResolver
+    </el-resolver>
+</application>
+```
+
+You cannot convert this to Java config because JSF's configuration model doesn't support it (JSF 2.2 doesn't have a programmatic config equivalent for EL resolvers). **This is one piece of XML that stays.**
+
+---
+
+## Step 8: Migrate Test Configuration
+
+Your JUnit 5 tests probably use `@ContextConfiguration` pointing to XML:
+
+```java
+// Before
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(locations = "classpath:applicationContext-test.xml")
+public class MyServiceTest { ... }
+
+// After
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = { TestDataSourceConfig.class, MyBatisConfig.class, AppConfig.class })
+public class MyServiceTest { ... }
+```
+
+Or use a dedicated test configuration class:
+
+```java
+@Configuration
+@Import({ MyBatisConfig.class, AppConfig.class })
+public class TestConfig {
+
+    @Bean
+    public DataSource dataSource() {
+        // H2 or in-memory Oracle equivalent for tests
+        // Though with Oracle-specific SQL in MyBatis mappers,
+        // you likely test against a real Oracle instance
+    }
+}
+```
+
+---
+
+## Migration Strategy: Incremental, Not Big-Bang
+
+Do **not** convert everything at once. Spring supports mixing XML and Java config:
+
+**From Java config, import XML:**
+```java
+@Configuration
+@ImportResource("classpath:legacy-beans.xml")
+public class AppConfig {
+    // New beans in Java
+}
+```
+
+**From XML, import Java config:**
+```xml
+<bean class="com.yourapp.config.DataSourceConfig"/>
+```
+
+This lets you migrate one configuration file at a time, testing after each step.
+
+---
+
+## Common Pitfalls Specific to Your Stack
+
+1. **Bean definition ordering:** XML processes top-down. Java config uses dependency injection to resolve order, but `BeanFactoryPostProcessor` beans (like `PropertySourcesPlaceholderConfigurer`) must be declared as `static @Bean` methods, or they won't work correctly.
+
+2. **Profile-specific configuration:** If your XML uses `<beans profile="...">`, the equivalent is `@Profile("...")` on `@Configuration` classes or `@Bean` methods.
+
+3. **JSF view scope:** If you use Spring-managed JSF view-scoped beans, make sure the custom scope is still registered. In XML this is often a `CustomScopeConfigurer` bean — convert it to a `@Bean` method.
+
+4. **Omnifaces 1.14 compatibility:** Omnifaces at this version predates CDI integration changes. It should be unaffected by Spring config changes, but verify that any `@ManagedBean` or CDI interactions still resolve after migration.
+
+5. **`mybatis-spring` version:** Your 1.3.3 is quite old. If you're upgrading Spring, check the [mybatis-spring compatibility matrix](https://mybatis.org/spring/). Spring 5.x needs mybatis-spring 2.x; Spring 6.x needs mybatis-spring 3.x.
+
+---
+
+Do you want me to drill into any specific part of this — for example, the JSF integration details, the test migration, or how this intersects with a Spring 5.x vs 6.x version target?
